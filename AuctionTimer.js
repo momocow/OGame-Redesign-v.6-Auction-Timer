@@ -6,7 +6,7 @@
 // @description    Displays a countdown timer for the Auction in OGame 6.*
 // @include     	*.ogame*gameforge.com/game/index.php?page=*
 // Originaly developed by Vesselin 
-// Bug Fix's by jimmy341 and momocow
+// Bug Fix's by momocow
 // @grant		   GM_getValue
 // @grant		   GM_setValue
 // @grant		   GM_deleteValue
