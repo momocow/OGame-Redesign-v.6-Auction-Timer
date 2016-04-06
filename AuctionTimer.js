@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name           OGame Redesign: Auction Timer
+// @name           OGame Redesign (v.6): Auction Timer
 // @namespace      https://github.com/momocow
 // @version        2.1
 // @date           2016-04-06
