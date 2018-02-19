@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           OGame Redesign (v.6): Auction Timer
 // @namespace      https://github.com/momocow
-// @version        2.1
+// @version        2.1.1
 // @date           2016-04-06
 // @description    Displays a countdown timer for the Auction in OGame 6.*
 // @include     	*.ogame*gameforge.com/game/index.php?page=*
