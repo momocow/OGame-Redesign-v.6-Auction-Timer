@@ -33,7 +33,7 @@
 			var first = false;
 			var overflowAuctionTimer = null;
 			var newMins, mins, secs, auctionTimer, auctionEndTime, currentTime;
-			var uni = document.location.href.replace (/^http:\/\/([^\/]+).+/, "$1");
+			var uni = document.location.href.replace (/^https:\/\/([^\/]+).+/, "$1");
 			function changeTimeLeft (timer, timeLeft)
 			{
 				if (typeof (timer) != "object")
@@ -148,7 +148,7 @@
 	}).toString ();
 	var myFunc2 = (function ()
 	{
-		var uni = document.location.href.replace (/^http:\/\/([^\/]+).+/, "$1");
+		var uni = document.location.href.replace (/^https:\/\/([^\/]+).+/, "$1");
 		var auctionEndTime = localStorage.getItem (uni + "_auctionEndTime");
 		if (auctionEndTime == null)
 			return;
