@@ -1,0 +1,37 @@
+{
+  "name": "ogame-redesign-v.6-auction-timer",
+  "version": "3.0.0",
+  "description": "Displays a countdown timer for the Auction in OGame 6.*",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "gulp build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer.git"
+  },
+  "keywords": [
+    "OGame",
+    "auction",
+    "timer"
+  ],
+  "author": "MomoCow",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer/issues"
+  },
+  "homepage": "https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer#readme",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-file": "^0.4.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-replace": "^0.6.1",
+    "gulp-sourcemaps": "^2.6.4",
+    "semver": "^5.5.0"
+  }
+}
