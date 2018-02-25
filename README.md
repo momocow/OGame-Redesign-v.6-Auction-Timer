@@ -27,6 +27,6 @@ If you prefer to install it through copy and paste from the source. You can find
 
 ## Changelog
 - v2.1.2
-    - [ADD] Introduce update flow into the script meta block. (db801437f5e9366805182405a41100aeac30e88b)
+    - [ADD] Introduce update flow into the script meta block. [db8014](db801437f5e9366805182405a41100aeac30e88b)
 - v2.1.1
     - [FIX] protocol changed from `http` to `https`. (05ce6de73e77654c2b716d6667da9b516acef864)
