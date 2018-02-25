@@ -1,3 +1,2 @@
-*.js
-!gulpfile.js
-!src/**/*.js
+header.js
+dist/**/*.js
