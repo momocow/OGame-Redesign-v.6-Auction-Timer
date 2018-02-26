@@ -13,40 +13,56 @@ module.exports = function (env, args) {
   if (typeof env !== 'object') env = {}
   if (typeof args !== 'object') args = {}
 
+  const DEV = env.dev || args.dev
+  const ENTRY = path.resolve(env.entry || args.entry)
+  const OUTFILE = env.outfile || args.outfile || ''
+  const OUTSUFFIX = DEV ? '-dev' : ''
+  const BANNER = env.banner || args.banner || ''
+
   return {
-    entry: path.resolve(env.entry || args.entry),
+    entry: ENTRY,
     output: {
-      filename: (env.outfile || args.outfile || '') + (env.dev || args.dev ? '-dev' : '') + '.user.js',
+      filename: OUTFILE + OUTSUFFIX + '.user.js',
       path: path.resolve(__dirname, 'dist')
     },
     mode: 'development',
     module: {
       rules: [{
+        test: new RegExp('^' + ENTRY + '$'),
+        use: [{
+          loader: 'webpack-rollup-loader',
+          query: {
+            format: 'cjs'
+          }
+        }]
+      }, {
         test: /\.css$/,
         use: [ 'to-string-loader', 'css-loader' ]
-      }, {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            cacheDirectory: true,
-            comments: false,
-            presets: [
-              [
-                '@babel/env',
-                {
-                  useBuiltIns: 'entry'
-                }
-              ]
-            ]
-          }
-        }
-      }]
+      }
+      // , {
+      //   test: /\.js$/,
+      //   exclude: /node_modules/,
+      //   use: {
+      //     loader: 'babel-loader',
+      //     options: {
+      //       cacheDirectory: true,
+      //       comments: false,
+      //       presets: [
+      //         [
+      //           '@babel/env',
+      //           {
+      //             useBuiltIns: 'entry'
+      //           }
+      //         ]
+      //       ]
+      //     }
+      //   }
+      // }
+      ]
     },
     plugins: [
-      new webpack.BannerPlugin({ banner: env.banner || args.banner || '', raw: true, entryOnly: true })
+      new webpack.BannerPlugin({ banner: BANNER, raw: true, entryOnly: true })
     ],
-    devtool: env.dev || args.dev ? 'source-map' : false
+    devtool: DEV ? 'source-map' : false
   }
 }

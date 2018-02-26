@@ -23,13 +23,16 @@
   },
   "homepage": "https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer#readme",
   "devDependencies": {
-    "@babel/core": "^7.0.0-beta.39",
-    "@babel/preset-env": "^7.0.0-beta.39",
-    "babel-loader": "^8.0.0-beta.0",
-    "css-loader": "^0.28.10",
-    "gulp": "^3.9.1",
+    "babel-core": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.26.0",
+    "gulp": "^4.0.0",
+    "gulp-babel": "^7.0.1",
     "gulp-file": "^0.4.0",
-    "to-string-loader": "^1.1.5",
-    "webpack": "^4.0.0"
+    "gulp-insert": "^0.5.0",
+    "gulp-sourcemaps": "^2.6.4",
+    "rollup": "^0.56.3",
+    "shelljs": "^0.8.1"
   }
 }

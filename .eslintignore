@@ -1,2 +1,3 @@
 header.js
+build/**/*.js
 dist/**/*.js
