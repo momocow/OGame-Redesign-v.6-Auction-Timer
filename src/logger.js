@@ -1,5 +1,8 @@
-const { format } = require('util')
-const { NotSupportedError } = require('./errors')
+import { format } from 'util'
+
+import { MAX_LOG_ENTRIES } from './config'
+import { NotSupportedError } from './errors'
+import { extend } from '../util/util'
 
 /* eslint-disable */
 GM_getValue = GM_getValue || function (key, defaultVal) {
@@ -95,6 +98,15 @@ class GMLogger {
   }
 }
 
-module.exports = {
-  GMLogger
+function getLogger () {
+  try {
+    return extend(new GMLogger({ MAX_LOG_ENTRIES }), console)
+  } catch (e) {
+    if (e instanceof NotSupportedError) {
+      window.alert(e.message)
+    }
+    return console
+  }
 }
+
+export const LOG = getLogger()
