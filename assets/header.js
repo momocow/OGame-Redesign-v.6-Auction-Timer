@@ -17,5 +17,7 @@ module.exports = function (version) {
  * - [Optmized] more stable dependency check
  *****************************************************************************/
 
-/* jshint asi:true */`
+/* jshint asi:true */
+
+`
 }

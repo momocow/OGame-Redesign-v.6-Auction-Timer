@@ -7,11 +7,3 @@ export function stripComment (src) {
       return line.replace(/\s*\/\/.*/, '')
     }).join('\n')
 }
-
-export function append (src, suffix) {
-  return src + suffix
-}
-
-export function prepend (src, prefix) {
-  return prefix + src
-}
