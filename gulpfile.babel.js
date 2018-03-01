@@ -10,6 +10,8 @@ const rename = require('gulp-rename')
 const srcmap = require('gulp-sourcemaps')
 const path = require('path')
 const rollup = require('rollup')
+const resolve = require('rollup-plugin-node-resolve')
+const cjs = require('rollup-plugin-commonjs')
 const shell = require('shelljs')
 
 const { SourceMap } = require('./util/build-time')
@@ -33,7 +35,11 @@ const ROLLUP_OUTFILE = path.resolve(ROLLUP_BUILDDIR, ensureExtname(FILENAME, '.j
 
 function gulpRollup () {
   return rollup.rollup({
-    input: path.resolve(BUILDDIR, ENTRY_FILE)
+    input: path.resolve(BUILDDIR, ENTRY_FILE),
+    plugins: [
+      resolve(),
+      cjs()
+    ]
   }).then(bundle => {
     return bundle.write({
       file: ROLLUP_OUTFILE,
@@ -52,7 +58,7 @@ function gulpBabel () {
 }
 
 function init () {
-  return gulp.src(path.join(SRCDIR, '**'), { base: '.' })
+  return gulp.src([ path.join(SRCDIR, '**'), 'util/**' ], { base: '.' })
     .pipe(gulp.dest(BUILDDIR))
 }
 

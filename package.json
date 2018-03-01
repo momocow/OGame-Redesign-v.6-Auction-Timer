@@ -35,6 +35,11 @@
     "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^2.6.4",
     "rollup": "^0.56.3",
+    "rollup-plugin-commonjs": "^8.3.0",
+    "rollup-plugin-node-resolve": "^3.0.3",
     "shelljs": "^0.8.1"
+  },
+  "dependencies": {
+    "extend": "^3.0.1"
   }
 }
