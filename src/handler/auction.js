@@ -26,7 +26,7 @@ export function handleAuction () {
     let newMins, mins, secs, auctionTimer, auctionEndTime, currentTime
     let uni = document.location.href.replace(/^https:\/\/([^/]+).+/, '$1')
 
-    if ($('#auctionTimer').length) { return }
+    if ($('#auctionTimer').length > 0) { return }
     $('p.auction_info').next().before('<span id="auctionTimer" style="font-weight: bold; color: ' + $('p.auction_info span').css('color') + ';"></span>')
     if ($('#div_traderAuctioneer .left_header h2').text().indexOf(loca.auctionFinished) < 0) {
       auctionEndTime = localStorage.getItem(uni + '_auctionEndTime')
@@ -37,7 +37,10 @@ export function handleAuction () {
         oldMins = Math.ceil(secs / 60)
         first = false
       } else {
-        oldMins = parseInt($('p.auction_info').text().match(/\d+/g)[0])
+        let matched = $('p.auction_info').text().match(/\d+/g)
+        if (!matched) return
+
+        oldMins = parseInt(matched[0])
         secs = oldMins * 60
         first = true
       }

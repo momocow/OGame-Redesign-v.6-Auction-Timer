@@ -11,8 +11,9 @@ module.exports = function (version) {
 // @updateURL      https://raw.githubusercontent.com/momocow/OGame-Redesign-v.6-Auction-Timer/master/dist/auction-timer.meta.js
 // @downloadURL    https://raw.githubusercontent.com/momocow/OGame-Redesign-v.6-Auction-Timer/master/dist/auction-timer.user.js
 // @supportURL     https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer/issues
-// @run-at         document-body
+// @run-at         document-idle
 // @grant          GM_getValue
 // @grant          GM_setValue
+// @grant          GM_addStyle
 // ==/UserScript==`
 }

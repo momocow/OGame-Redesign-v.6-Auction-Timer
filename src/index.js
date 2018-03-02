@@ -9,12 +9,27 @@ import { LOG } from './logger'
   if (document.location.href.indexOf('/game/index.php?') < 0) { return }
 
   try {
-    if (document.location.href.indexOf('/game/index.php?page=traderOverview') >= 0) {
-      checkDependencies(window, DEP_LIST.AUCTION, handleAuction)
-    } else if (document.getElementById('bar')) {
-      checkDependencies(window, DEP_LIST.NON_AUCTION, handleNonAuction)
+    let handle = function (cb, err) {
+      if (err) {
+        LOG.error('Failed to pass dependency check.')
+        LOG.error(err)
+        return
+      }
+      cb()
     }
+    let deps
+
+    if (document.location.href.indexOf('/game/index.php?page=traderOverview') >= 0) {
+      deps = DEP_LIST.AUCTION
+      handle = handle.bind(null, handleAuction)
+    } else if (document.getElementById('bar')) {
+      deps = DEP_LIST.NON_AUCTION
+      handle = handle.bind(null, handleNonAuction)
+    }
+
+    checkDependencies(unsafeWindow, deps, handle)
   } catch (e) {
+    LOG.error('Error is caught in the entry.')
     LOG.error(e)
   }
 })()

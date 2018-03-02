@@ -36,6 +36,8 @@
     "gulp-sourcemaps": "^2.6.4",
     "rollup": "^0.56.3",
     "rollup-plugin-commonjs": "^8.3.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.1.0",
     "rollup-plugin-node-resolve": "^3.0.3",
     "shelljs": "^0.8.1"
   },

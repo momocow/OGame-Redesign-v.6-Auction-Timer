@@ -1,8 +1,8 @@
 import { NOT_SUPPORTED_ENV } from './strings'
 
 export class DependencyError extends Error {
-  constructor (depName, reason) {
-    super(`Dependency check failed for '${depName}'. Reason: ${reason}`)
+  constructor (deps) {
+    super(`Dependency check failed. Dependencies, ${deps.map(e => `"${e}"`).join(', ')}, are not found.`)
     this.name = 'DependencyError'
   }
 }

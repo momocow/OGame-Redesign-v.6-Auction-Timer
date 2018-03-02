@@ -1,8 +1,9 @@
 import { format } from 'util'
-import extend from 'extend'
 
 import { MAX_LOG_ENTRIES } from './config'
 import { NotSupportedError } from './errors'
+import { error as promptError } from './ui/dialog'
+
 /* eslint-disable */
 GM_getValue = GM_getValue || function (key, defaultVal) {
   if (!window.localStorage && !window.localStorage.getItem) throw new NotSupportedError()
@@ -19,8 +20,8 @@ GM_setValue = GM_setValue || function (key, val) {
 /* eslint-enable */
 
 class GMLogger {
-  constructor (superObj, config) {
-    extend(true, this, superObj)
+  constructor (config) {
+    this.constructor.prototype.prototype = console.prototype
 
     this._GM_key = '__logs__'
     this._MAX_LOG_ENTRIES = config.MAX_LOG_ENTRIES
@@ -48,6 +49,16 @@ class GMLogger {
         return `[${time}][${level}] ${msg}`
       }
     })
+
+    if (level === 'error') {
+      let ep = promptError('Error occurs. <br>(Click to view logs)', {
+        listeners: {
+          click: function (e) {
+            ep.hide()
+          }
+        }
+      })
+    }
   }
 
   _load () {
@@ -101,7 +112,7 @@ class GMLogger {
 
 function getLogger () {
   try {
-    return new GMLogger(console, { MAX_LOG_ENTRIES })
+    return new GMLogger({ MAX_LOG_ENTRIES })
   } catch (e) {
     if (e instanceof NotSupportedError) {
       window.alert(e.message)

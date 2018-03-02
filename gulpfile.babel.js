@@ -10,6 +10,8 @@ const rename = require('gulp-rename')
 const srcmap = require('gulp-sourcemaps')
 const path = require('path')
 const rollup = require('rollup')
+const builtins = require('rollup-plugin-node-builtins')
+const globals = require('rollup-plugin-node-globals')
 const resolve = require('rollup-plugin-node-resolve')
 const cjs = require('rollup-plugin-commonjs')
 const shell = require('shelljs')
@@ -37,7 +39,11 @@ function gulpRollup () {
   return rollup.rollup({
     input: path.resolve(BUILDDIR, ENTRY_FILE),
     plugins: [
-      resolve(),
+      resolve({
+        preferBuiltins: true
+      }),
+      builtins(),
+      globals(),
       cjs()
     ]
   }).then(bundle => {
