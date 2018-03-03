@@ -3405,7 +3405,7 @@ function handleNonAuction() {
   clock.parent().append('<li id="auctionTimer" style="padding: 0;width: 120px;position: absolute; right: 135px;"></li>');
   if (auctionEndTime < currentTime) {
     LOG.info('Invalid ending time: ' + new Date(auctionEndTime).toLocaleString() + ' (' + auctionEndTime + 'ms)');
-    $('#auctionTimer').text('[Auc. Timer] Pending...').addClass('pending');
+    $('#auctionTimer').text('Pending...').addClass('pending');
   } else {
     LOG.info('Ending time is found in storage. Action will end at ' + new Date(auctionEndTime).toLocaleString());
     $('#auctionTimer').addClass('service');
