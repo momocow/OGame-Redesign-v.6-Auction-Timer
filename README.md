@@ -1,10 +1,15 @@
 # OGame Redesign (v.6): Auction Timer
 
 ## Changelog
+- v3.0.0
+    - [ADDED] Dependency check [(#3)](https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer/issues/3)
+    - [ADDED] Stateful timer [(#4)](https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer/issues/4)
+    - [ADDED] Ingame logger panel [(#6)](https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer/issues/6)
+    - [CHANGED] Deprecate `localStorage`, use the storage provide by the script engine, e.g. TamperMonkey, through `GM_setValue`/`GM_getValue` instead
 - v2.1.2
-    - [ADD] Introduce update flow into the script meta block. [(db80143)](https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer/commit/db801437f5e9366805182405a41100aeac30e88b)
+    - [ADDED] Introduce update flow into the script meta block. [(db80143)](https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer/commit/db801437f5e9366805182405a41100aeac30e88b)
 - v2.1.1
-    - [FIX] protocol changed from `http` to `https`. [(05ce6de)](https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer/commit/05ce6de73e77654c2b716d6667da9b516acef864)
+    - [FIXED] protocol changed from `http` to `https`. [(05ce6de)](https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer/commit/05ce6de73e77654c2b716d6667da9b516acef864)
 
 ## Installation Guide
 There are different ways to install userscripts. Here is the [official installation guide](http://tampermonkey.net/faq.php#Q102) from Tampermonkey.
