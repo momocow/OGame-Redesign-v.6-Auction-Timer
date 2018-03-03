@@ -1,10 +1,11 @@
 {
   "name": "ogame-redesign-v.6-auction-timer",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Displays a countdown timer for the Auction in OGame 6.*",
   "main": "src/index.js",
   "scripts": {
     "build": "gulp build",
+    "dist": "gulp dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -24,14 +25,23 @@
   "homepage": "https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer#readme",
   "devDependencies": {
     "babel-core": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.6.1",
-    "gulp": "^3.9.1",
+    "babel-register": "^6.26.0",
+    "gulp": "^4.0.0",
     "gulp-babel": "^7.0.1",
-    "gulp-concat": "^2.6.1",
     "gulp-file": "^0.4.0",
+    "gulp-insert": "^0.5.0",
     "gulp-rename": "^1.2.2",
-    "gulp-replace": "^0.6.1",
     "gulp-sourcemaps": "^2.6.4",
-    "semver": "^5.5.0"
+    "rollup": "^0.56.3",
+    "rollup-plugin-commonjs": "^8.3.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.1.0",
+    "rollup-plugin-node-resolve": "^3.0.3",
+    "shelljs": "^0.8.1"
+  },
+  "dependencies": {
+    "extend": "^3.0.1"
   }
 }

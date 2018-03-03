@@ -1,0 +1,12 @@
+{
+  "comments": false,
+  "presets": [[
+    "env",
+    { "useBuiltIns": "entry" }
+  ]],
+  "plugins": [[
+    "transform-object-rest-spread",
+    { "useBuiltIns": true }
+  ]],
+  "sourceMaps": false
+}
