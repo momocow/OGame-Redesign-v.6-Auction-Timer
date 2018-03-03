@@ -46,8 +46,8 @@ var MAX_LOG_ENTRIES = 500;
 var MAX_DEP_TIMEOUT = 10000;
 var DEP_CHECK_PERIOD = 500;
 var DEP_LIST = {
-  AUCTION: ['io', '$', 'localStorage', 'nodeParams', 'simpleCountdown', 'loca'],
-  NON_AUCTION: ['$', 'localStorage', 'simpleCountdown']
+  AUCTION: ['io', '$', 'nodeParams', 'simpleCountdown', 'loca'],
+  NON_AUCTION: ['$', 'simpleCountdown']
 };
 
 var hasOwn = Object.prototype.hasOwnProperty;
@@ -2920,6 +2920,8 @@ function error(msg, options) {
   return error.dialog;
 }
 
+var EMPTY_LOGS = 'No logs available for the current filter.';
+
 GM_getValue = GM_getValue || function (key, defaultVal) {
   if (!window.localStorage && !window.localStorage.getItem) throw new NotSupportedError();
 
@@ -3047,7 +3049,7 @@ var GMLogger = function () {
           copyzone.classList.add('auc-timer-copyzone');
           copyzone.value = _this7._cache.filter(function (entry) {
             return GMLogger.levelMap[entry.level] >= GMLogger.levelMap[_this7.level];
-          }).join('\n').trim() || 'No logs for the current level';
+          }).join('\n').trim() || EMPTY_LOGS;
           copyzone.select();
           document.execCommand('copy');
         });
@@ -3074,7 +3076,7 @@ var GMLogger = function () {
         return entry.toHTML();
       }).join('<hr class="auc-timer-logger-sep">');
 
-      logsDisplay.innerHTML = logs.trim() ? logs : '<div style="color:grey;pointer-events: none;">No logs for the current level</div>';
+      logsDisplay.innerHTML = logs.trim() ? logs : '<div style="color:grey;pointer-events: none;">' + EMPTY_LOGS + '</div>';
     }
   }, {
     key: 'closePanel',
@@ -3278,13 +3280,14 @@ function handleAuction() {
     }
     $('p.auction_info').next().before('<span id="auctionTimer" style="font-weight: bold; color: ' + $('p.auction_info span').css('color') + ';"></span>');
     if ($('#div_traderAuctioneer .left_header h2').text().indexOf(loca.auctionFinished) < 0) {
-      auctionEndTime = localStorage.getItem(uni + '_auctionEndTime');
-      auctionEndTime = auctionEndTime ? parseInt(auctionEndTime) : -1;
+      auctionEndTime = GM_getValue(uni + '_auctionEndTime', -1);
       currentTime = new Date().getTime();
       if (auctionEndTime >= currentTime) {
         secs = Math.round((auctionEndTime - currentTime) / 1000);
         oldMins = Math.ceil(secs / 60);
         first = false;
+        LOG.info('Ending time is found in storage. Action will end at ' + new Date(auctionEndTime).toLocaleString());
+        document.getElementById('auctionTimer').classList.add('service');
       } else {
         var matched = $('p.auction_info').text().match(/\d+/g);
         if (!matched) return;
@@ -3304,20 +3307,22 @@ function handleAuction() {
       mySock.on('timeLeft', function (msg) {
         if ($('#div_traderAuctioneer .left_header h2').text().indexOf(loca.auctionFinished) >= 0) {
           first = true;
-          localStorage.setItem(uni + '_auctionEndTime', '-1');
+          GM_setValue(uni + '_auctionEndTime', '-1');
+          LOG.info('Auction ends');
+          document.getElementById('auctionTimer').classList.remove('service');
           return;
         }
-        auctionEndTime = localStorage.getItem(uni + '_auctionEndTime');
-        auctionEndTime = auctionEndTime ? parseInt(auctionEndTime) : -1;
+        auctionEndTime = GM_getValue(uni + '_auctionEndTime', -1);
         currentTime = new Date().getTime();
-        /<b>\D+(\d+)/.exec(msg);
-        newMins = parseInt(RegExp.$1);
+        newMins = parseInt(/<b>\D+(\d+)/.exec(msg)[1]);
         if (newMins === oldMins) {
           mins--;
           if (first) {
             first = false;
           } else if (auctionEndTime >= 0) {
-            localStorage.setItem(uni + '_auctionEndTime', currentTime + mins * 60 * 1000);
+            GM_setValue(uni + '_auctionEndTime', currentTime + mins * 60 * 1000);
+            LOG.info('Auction ending time is locked');
+            document.getElementById('auctionTimer').classList.add('service');
           }
         } else {
           if (newMins > oldMins && auctionEndTime >= currentTime) {
@@ -3326,7 +3331,9 @@ function handleAuction() {
           if (first) {
             first = false;
           } else if (oldMins >= 0) {
-            localStorage.setItem(uni + '_auctionEndTime', currentTime + newMins * 60 * 1000);
+            GM_setValue(uni + '_auctionEndTime', currentTime + newMins * 60 * 1000);
+            LOG.info('Auction ending time is locked');
+            document.getElementById('auctionTimer').classList.add('service');
           }
           oldMins = newMins;
           mins = newMins;
@@ -3350,6 +3357,7 @@ function handleAuction() {
         });
         overflowAuctionTimer = null;
         first = true;
+        LOG.info('Auction starts');
         setTimeout(function () {
           $('#auctionTimer').css('color', $('p.auction_info span').css('color'));
         }, 100);
@@ -3358,15 +3366,21 @@ function handleAuction() {
         changeTimeLeft(auctionTimer, 0);
         changeTimeLeft(overflowAuctionTimer, 0);
         first = true;
-        localStorage.setItem(uni + '_auctionEndTime', '-1');
+        GM_setValue(uni + '_auctionEndTime', '-1');
+        LOG.info('Auction ends');
+        document.getElementById('auctionTimer').classList.remove('service');
       });
     });
 
     onConnect.on('error', function (err) {
+      LOG.error('Error occurs in #onConnect()');
       LOG.error(err);
     });
 
-    mySock.on('connect', onConnect).on('error', LOG.error.bind(LOG));
+    mySock.on('connect', onConnect).on('error', function (err) {
+      LOG.error('Socket error.');
+      LOG.error(err);
+    });
   };
 
   if (document.getElementById('div_traderAuctioneer')) {
@@ -3384,27 +3398,24 @@ var SimpleCountdown$1 = simpleCountdown;
 
 function handleNonAuction() {
   var uni = document.location.href.replace(/^https:\/\/([^/]+).+/, '$1');
-  var auctionEndTime = localStorage.getItem(uni + '_auctionEndTime');
-  if (auctionEndTime == null) {
-    return;
-  }
+  var auctionEndTime = GM_getValue(uni + '_auctionEndTime', -1);
   auctionEndTime = parseInt(auctionEndTime);
   var currentTime = new Date().getTime();
+  var clock = $('.OGameClock');
+  clock.parent().append('<li id="auctionTimer" style="padding: 0;width: 120px;position: absolute; right: 135px;"></li>');
   if (auctionEndTime < currentTime) {
-    return;
+    LOG.info('Invalid ending time: ' + new Date(auctionEndTime).toLocaleString() + ' (' + auctionEndTime + 'ms)');
+    $('#auctionTimer').text('[Auc. Timer] Pending...').addClass('pending');
+  } else {
+    LOG.info('Ending time is found in storage. Action will end at ' + new Date(auctionEndTime).toLocaleString());
+    $('#auctionTimer').addClass('service');
+    var auctionTimer = new SimpleCountdown$1($('#auctionTimer').get(0), Math.round((auctionEndTime - currentTime) / 1000), function () {
+      $('#auctionTimer').text('');
+    });
   }
-  var clock = $('#OGameClock');
-  if (clock.length <= 0) {
-    clock = $('.OGameClock');
-  }
-  if (clock.length <= 0) {
-    return;
-  }
-  clock.parent().append('<li id="auctionTimer" style="position: absolute; right: 125px;"></li>');
-  var auctionTimer = new SimpleCountdown$1($('#auctionTimer').get(0), Math.round((auctionEndTime - currentTime) / 1000), function () {
-    $('#auctionTimer').text('');
-  });
 }
+
+GM_addStyle('\n  #auctionTimer {\n    display: inline-block;\n    width: 100%;\n    text-align: center;\n    background-color: initial;\n    transition: background-color 0.5s;\n    padding-top: 5px;\n    padding-bottom: 5px;\n  }\n\n  #auctionTimer.service {\n    background-color: #1d5a1d;\n  }\n\n  #auctionTimer.pending {\n    background-color: #922929;\n  }\n');
 
 (function () {
   if (document.location.href.indexOf('/game/index.php?') < 0) {
