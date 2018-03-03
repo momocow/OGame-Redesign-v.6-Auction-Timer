@@ -42,7 +42,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var MAX_LOG_ENTRIES = 100;
+var MAX_LOG_ENTRIES = 500;
 var MAX_DEP_TIMEOUT = 10000;
 var DEP_CHECK_PERIOD = 500;
 var DEP_LIST = {
@@ -2743,109 +2743,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-GM_addStyle('\n  .auc-timer-dialog-container {\n    float: right;\n    width: 280px;\n    height: 0;\n    z-index: 1000000;\n    position: fixed;\n    right: 0;\n    bottom: 0;\n    padding: 20px;\n    overflow: hidden;\n    transition: height: 0.5;\n  }\n\n  .auc-timer-dialog {\n    width: 240px;\n    margin-top: 8px;\n    height: 0;\n    padding: 20px;\n    color: #ededed;\n    font-size: 16px;\n    cursor: pointer;\n    position: relative;\n    border-radius: 2px;\n    opacity: 0;\n    left: 300px;\n    transition: height: 0.5, opacity 0.5s, left 0.5s;\n  }\n\n  .auc-timer-dialog.auc-timer-error {\n    background-color: #c8181888;\n  }\n\n  .auc-timer-dialog.active {\n    left: 0;\n    height: auto;\n    opacity: 1;\n  }\n');
-
-var DialogManager = function () {
-  function DialogManager() {
-    _classCallCheck(this, DialogManager);
-
-    this._no = 0;
-    this._queue = [];
-    this._isBusy = false;
-    this._dialogs = {};
-
-    this._container = document.body.appendChild(document.createElement('div'));
-    this._container.classList.add('auc-timer-dialog-container');
-  }
-
-  _createClass(DialogManager, [{
-    key: '_startProcessing',
-    value: function _startProcessing() {
-      if (this._isBusy) return;
-
-      this._isBusy = true;
-      this._processStep();
-    }
-  }, {
-    key: '_processStep',
-    value: function _processStep() {
-      var _this4 = this;
-
-      setTimeout(function () {
-        var dialogMeta = _this4._queue.shift();
-        _this4._container.style.height = _this4._container.getBoundingClientRect().height - 40 + dialogMeta.box.height + 'px';
-
-        dialogMeta.show();
-
-        if (_this4._queue.length > 0) {
-          _this4._processStep();
-        } else {
-          _this4._isBusy = false;
-        }
-      }, DialogManager.PROCESS_DELAY);
-    }
-  }, {
-    key: 'register',
-    value: function register(dialog, show) {
-      if (!dialog.el) throw new Error('Dialog should have a \'el\' property.');
-
-      this._container.appendChild(dialog.el);
-
-      var dialogId = DialogManager.PREFIX + this._no++;
-      this._dialogs[dialogId] = dialog;
-      this._queue.push({ box: dialog.el.getBoundingClientRect(), show: show });
-      this._startProcessing();
-      return dialogId;
-    }
-  }, {
-    key: 'unregister',
-    value: function unregister(dialogOrId, hide) {
-      var prevDialog = void 0;
-
-      if (typeof dialogOrId === 'string') {
-        prevDialog = this._dialogs[dialogOrId];
-        delete this._dialogs[dialogOrId];
-      } else {
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-          for (var _iterator = Object.keys(this._dialogs)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var DID = _step.value;
-
-            if (this._dialogs[DID] === dialogOrId) {
-              prevDialog = this._dialogs[DID];
-              delete this._dialogs[DID];
-            }
-          }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-              _iterator.return();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
-        }
-      }
-
-      hide();
-      prevDialog.el.remove();
-    }
-  }]);
-
-  return DialogManager;
-}();
-
-DialogManager.PROCESS_DELAY = 500;
-DialogManager.PREFIX = 'auc-timer-dialog-';
-DialogManager.INSTANCE = new DialogManager();
+var dialogContainer = document.body.appendChild(document.createElement('div'));
+dialogContainer.classList.add('auc-timer-dialog-container');
 
 var Dialog = function (_EventEmitter) {
   _inherits(Dialog, _EventEmitter);
@@ -2859,63 +2758,166 @@ var Dialog = function (_EventEmitter) {
       options = { ttl: 5000, listeners: {} };
     }
 
-    var _this5 = _possibleConstructorReturn(this, (Dialog.__proto__ || Object.getPrototypeOf(Dialog)).call(this));
+    var _this4 = _possibleConstructorReturn(this, (Dialog.__proto__ || Object.getPrototypeOf(Dialog)).call(this));
+
+    _this4._elListeners = {};
 
     options.ttl = typeof options.ttl === 'number' ? options.ttl : 5000;
     options.listeners = _typeof(options.listeners) === 'object' ? options.listeners : {};
-    _this5.options = options;
-    _this5._id = '';
+    _this4.options = options;
+    _this4._id = '';
+    _this4.isShown = false;
 
-    _this5.el = document.createElement('div');
-    _this5.el.innerHTML = msg;
-    _this5.el.classList.add('auc-timer-dialog', 'auc-timer-' + type);
-    _this5.el.addEventListener('animationend', function () {
-      if (_this5.el.classList.contains('active')) _this5.emit('show');else _this5.emit('hide');
+    _this4.el = dialogContainer.appendChild(document.createElement('div'));
+    _this4.msgList = _this4.el.appendChild(document.createElement('ul'));
+    _this4.footer = _this4.el.appendChild(document.createElement('div'));
+    _this4.append(msg);
+
+    _this4.el.classList.add('auc-timer-dialog', 'auc-timer-' + type);
+    _this4.el.addEventListener('click', function () {
+      _this4.hide();
     });
-    _this5.on('show', function () {
+    _this4.el.addEventListener('transitionend', function (e) {
+      if (e.propertyName === 'opacity') {
+        if (_this4.el.classList.contains('active')) {
+          _this4.isShown = true;
+          _this4.emit('show');
+        } else if (_this4.el.classList.contains('idle')) {
+          _this4.emit('idle');
+        } else {
+          _this4.isShown = false;
+          _this4.emit('hide');
+        }
+      }
+    });
+
+    _this4.on('show', function () {
       setTimeout(function () {
-        _this5.hide();
-      }, _this5.options.ttl);
+        _this4.idle();
+      }, _this4.options.ttl);
+    }).on('hide', function () {
+      dialogContainer.style.zIndex = -1000000;
+      _this4.clear();
     });
 
     Object.keys(options.listeners).forEach(function (listener) {
-      _this5.el.addEventListener(listener, options.listeners[listener]);
+      _this4.el.addEventListener(listener, options.listeners[listener]);
     });
-
-    _this5.show();
-    return _this5;
+    return _this4;
   }
 
   _createClass(Dialog, [{
     key: 'show',
     value: function show() {
-      var _this6 = this;
-
-      if (this._id) return;
-
-      this._id = DialogManager.INSTANCE.register(this, function () {
-        _this6.el.classList.add('active');
-      });
+      if (this.el) {
+        dialogContainer.style.zIndex = 1000000;
+        this.el.classList.remove('idle');
+        this.el.classList.add('active');
+      }
+      return this;
+    }
+  }, {
+    key: 'idle',
+    value: function idle() {
+      if (this.el) {
+        this.el.classList.remove('active');
+        this.el.classList.add('idle');
+      }
+      return this;
     }
   }, {
     key: 'hide',
     value: function hide() {
-      if (!this.el) return;
+      if (this.el) {
+        this.el.classList.remove('active', 'idle');
+      }
+      return this;
+    }
+  }, {
+    key: 'clear',
+    value: function clear() {
+      this.msgList.innerHTML = '';
+      this.footer.innerHTML = '';
+    }
+  }, {
+    key: 'append',
+    value: function append(msg) {
+      if (msg) this.msgList.appendChild(document.createElement('li')).innerHTML = msg;
+      return this;
+    }
+  }, {
+    key: 'onEl',
+    value: function onEl(event, cb) {
+      if (this._elListeners[event]) return this;
 
-      var _el = this.el;
-      DialogManager.INSTANCE.ungister(this._id, function () {
-        _el.classList.remove('active');
+      this._elListeners[event] = cb;
+      this.el.addEventListener(event, cb);
+      return this;
+    }
+  }, {
+    key: 'unElAll',
+    value: function unElAll() {
+      var _this5 = this;
+
+      Object.keys(this._elListeners).forEach(function (event) {
+        _this5.el.removeEventListener(event, _this5._elListeners[event]);
       });
-
-      delete this.el;
+      return this;
+    }
+  }, {
+    key: 'unEl',
+    value: function unEl(event) {
+      this.el.removeEventListener(event, this._elListeners[event]);
+      return this;
+    }
+  }, {
+    key: 'setFooter',
+    value: function setFooter(msg) {
+      this.footer.innerHTML = msg;
+      return this;
     }
   }]);
 
   return Dialog;
 }(EventEmitter);
 
+Dialog.SHOWUP_DELAY = 500;
+Dialog.TRANSITION_DURATION = 500;
+
+GM_addStyle('\n  .auc-timer-dialog-container {\n    float: right;\n    width: 280px;\n    z-index: -1000000;\n    position: fixed;\n    right: 0;\n    bottom: 20px;\n    padding: 20px;\n    overflow: hidden;\n  }\n\n  .auc-timer-dialog {\n    width: 240px;\n    margin-top: 8px;\n    padding: 20px;\n    color: #ededed;\n    font-size: 16px;\n    cursor: pointer;\n    position: relative;\n    border-radius: 2px;\n    opacity: 0;\n    left: 300px;\n    -webkit-transition: opacity ' + Dialog.TRANSITION_DURATION + 'ms, left ' + Dialog.TRANSITION_DURATION + 'ms;\n    transition: opacity ' + Dialog.TRANSITION_DURATION + 'ms, left ' + Dialog.TRANSITION_DURATION + 'ms;\n  }\n\n  .auc-timer-dialog>ul{\n    list-style-type: square;\n    position: relative;\n    left: 10px;\n  }\n\n  .auc-timer-dialog.auc-timer-error {\n    background-color: #c8181888;\n  }\n\n  .auc-timer-dialog.active {\n    left: 0;\n    opacity: 1;\n  }\n\n  .auc-timer-dialog.idle {\n    left: 0;\n    opacity: 0.5;\n  }\n\n  .auc-timer-dialog.idle:hover {\n    opacity: 1;\n  }\n');
+
+function hasDialogShown(type) {
+  switch (type) {
+    case 'error':
+      return error.dialog && error.dialog.isShown;
+    default:
+      return false;
+  }
+}
+
 function error(msg, options) {
-  return new Dialog('error', msg, options);
+  error.dialog = error.dialog || new Dialog('error', '');
+  error.dialog.append(msg);
+
+  if (typeof options === 'function') {
+    error.dialog.onEl('click', options);
+  } else if ((typeof options === 'undefined' ? 'undefined' : _typeof(options)) === 'object') {
+    if (typeof options.click === 'function') {
+      error.dialog.onEl('click', options.click);
+    }
+
+    if (typeof options.footer === 'string') {
+      error.dialog.setFooter(options.footer);
+    }
+  } else if (typeof options === 'string') {
+    error.dialog.setFooter(options);
+  }
+
+  setTimeout(function () {
+    error.dialog.show();
+  }, Dialog.SHOWUP_DELAY);
+
+  return error.dialog;
 }
 
 GM_getValue = GM_getValue || function (key, defaultVal) {
@@ -2931,20 +2933,160 @@ GM_setValue = GM_setValue || function (key, val) {
   window.localStorage.setItem(key, val);
 };
 
+
+GM_addStyle('\n  .auc-timer-logger {\n    width: 585px;\n    height: calc((100vh - 300px) * 0.9);\n    background-color: #00000077;\n    padding-left: 65px;\n    padding-top: calc((100vh - 300px) * 0.05);\n  }\n\n  .auc-timer-logger.hidden {\n    display: none;\n  }\n\n  .auc-timer-logger-logs {\n    width: 520px;\n    height: 80%;\n    background-color: #b3c3cb;\n    border: 1px solid #668599;\n    border-bottom-color: #d3d9de;\n    border-radius: 3px;\n    box-shadow: inset 0 1px 3px 0 #454f54;\n    font-size: 14px;\n    font-family: Arial,Helvetica,sans-serif;\n    min-height: 130px;\n    padding: 5px;\n    overflow-y: auto;\n  }\n\n  .auc-timer-logger-fn {\n    width: 246px;\n    height: 20px;\n    cursor: pointer;\n    border-radius: 4px;\n    color: white;\n    text-align: center;\n    padding: 10px;\n    font-size: 16px;\n  }\n\n  .auc-timer-logger-copy {\n    display: inline-block;\n    background-color: #0058a277;\n  }\n\n  .auc-timer-logger-copy:hover {\n    background-color: #7cc3ff77;\n  }\n\n  .auc-timer-logger-reset {\n    display: inline-block;\n    background-color: #e4353577;\n  }\n\n  .auc-timer-logger-reset:hover {\n    background-color: #ffa5a577;\n  }\n\n  .auc-timer-logger-info {\n    color: green;\n  }\n\n  .auc-timer-logger-warn {\n    color: #d88720;\n  }\n\n  .auc-timer-logger-debug {\n    color: grey;\n  }\n\n  .auc-timer-logger-error {\n    font-wieght: 500;\n    color: red;\n  }\n\n  hr.auc-timer-logger-sep {\n    margin-top: 4px;\n    margin-bottom: 4px;\n  }\n\n  .auc-timer-copyzone {\n    position: absolute;\n    left: -10000px;\n    top: -10000px;\n  }\n\n  .auc-timer-logger-filter {\n    width: 160px;\n  }\n');
+
+var GMLogEntry = function () {
+  function GMLogEntry(time, level, msg) {
+    _classCallCheck(this, GMLogEntry);
+
+    this.time = time;
+    this.level = level;
+    this.msg = msg;
+  }
+
+  _createClass(GMLogEntry, [{
+    key: 'toHTML',
+    value: function toHTML() {
+      return '<div class="auc-timer-logger-' + this.level + '">[' + this.time + '][' + this.level + '] ' + this.msg + '</div>';
+    }
+  }, {
+    key: 'toString',
+    value: function toString() {
+      return '[' + this.time + '][' + this.level + '] ' + this.msg;
+    }
+  }]);
+
+  return GMLogEntry;
+}();
+
 var GMLogger = function () {
   function GMLogger(config) {
+    var _this6 = this;
+
     _classCallCheck(this, GMLogger);
 
     this.constructor.prototype.prototype = console.prototype;
 
     this._GM_key = '__logs__';
+    this._state_key = '__state__';
     this._MAX_LOG_ENTRIES = config.MAX_LOG_ENTRIES;
     this._cache = [];
+    this.level = 'error';
+    this.isShown = false;
+
+    this.content = null;
+    this.menuBtn = document.getElementById('menuTable').appendChild(document.createElement('li'));
+    var menuAnchor = this.menuBtn.appendChild(document.createElement('a'));
+    menuAnchor.href = 'javascript:void(0)';
+    menuAnchor.innerHTML = '<span class="textlabel">Auc. Timer</span>';
+    menuAnchor.classList.add('menubutton');
+    menuAnchor.addEventListener('click', function () {
+      if (_this6.isShown) {
+        _this6.closePanel();
+      } else {
+        _this6.showPanel();
+      }
+    });
 
     this._load();
   }
 
   _createClass(GMLogger, [{
+    key: 'setLevel',
+    value: function setLevel(level) {
+      this.level = level;
+    }
+  }, {
+    key: 'showPanel',
+    value: function showPanel() {
+      var _this7 = this;
+
+      var logsDisplay = void 0;
+
+      if (!this.content) {
+        this.content = document.getElementById('contentWrapper').appendChild(document.createElement('div'));
+        this.content.classList.add('auc-timer-logger');
+
+        var logFilterLabel = this.content.appendChild(document.createElement('label'));
+        logFilterLabel.htmlFor = 'auc-timer-logfilter';
+        logFilterLabel.innerHTML = 'Log Level: &nbsp;&nbsp;&nbsp;';
+
+        var logFilter = logFilterLabel.appendChild(document.createElement('select'));
+        logFilter.id = 'auc-timer-logfilter';
+        logFilter.classList.add('auc-timer-logger-filter');
+        logFilter.innerHTML = '\n        <option class="" value="debug" ' + (this.level === 'debug' ? 'selected' : '') + '>DEBUG</option>\n        <option class="" value="info" ' + (this.level === 'info' ? 'selected' : '') + '>INFO</option>\n        <option class="" value="warn" ' + (this.level === 'warn' ? 'selected' : '') + '>WARN</option>\n        <option class="" value="error" ' + (this.level === 'error' ? 'selected' : '') + '>ERROR</option>\n        <option class="" value="off" ' + (this.level === 'off' ? 'selected' : '') + '>OFF</option>\n      ';
+
+        try {
+          $(logFilter).ogameDropDown().on('change', function () {
+            _this7.level = $(logFilter).val();
+            GM_setValue(_this7._state_key, { level: _this7.level });
+            _this7.loadLogs(logsDisplay);
+          });
+        } catch (err) {
+          console.error(err);
+        }
+
+        logsDisplay = this.content.appendChild(document.createElement('div'));
+        logsDisplay.classList.add('auc-timer-logger-logs');
+
+        var resetBtn = this.content.appendChild(document.createElement('div'));
+        resetBtn.classList.add('auc-timer-logger-reset', 'auc-timer-logger-fn');
+        resetBtn.innerHTML = 'Reset';
+        resetBtn.addEventListener('click', function () {
+          _this7._cache = [];
+          _this7._save();
+          _this7.loadLogs(logsDisplay);
+        });
+
+        var copyBtn = this.content.appendChild(document.createElement('div'));
+        copyBtn.classList.add('auc-timer-logger-copy', 'auc-timer-logger-fn');
+        copyBtn.innerHTML = 'Copy';
+        copyBtn.addEventListener('click', function () {
+          var copyzone = document.body.appendChild(document.createElement('textarea'));
+          copyzone.classList.add('auc-timer-copyzone');
+          copyzone.value = _this7._cache.filter(function (entry) {
+            return GMLogger.levelMap[entry.level] >= GMLogger.levelMap[_this7.level];
+          }).join('\n').trim() || 'No logs for the current level';
+          copyzone.select();
+          document.execCommand('copy');
+        });
+      } else {
+        logsDisplay = this.content.firstChild;
+      }
+
+      this.loadLogs(logsDisplay);
+
+      logsDisplay.scrollTop = logsDisplay.scrollHeight;
+
+      this.content.classList.remove('hidden');
+      document.getElementById('inhalt').style.display = 'none';
+      this.isShown = true;
+    }
+  }, {
+    key: 'loadLogs',
+    value: function loadLogs(logsDisplay) {
+      var _this8 = this;
+
+      var logs = this._cache.filter(function (entry) {
+        return GMLogger.levelMap[entry.level] >= GMLogger.levelMap[_this8.level];
+      }).map(function (entry) {
+        return entry.toHTML();
+      }).join('<hr class="auc-timer-logger-sep">');
+
+      logsDisplay.innerHTML = logs.trim() ? logs : '<div style="color:grey;pointer-events: none;">No logs for the current level</div>';
+    }
+  }, {
+    key: 'closePanel',
+    value: function closePanel() {
+      if (this.content && !this.content.classList.contains('hidden')) {
+        this.content.classList.add('hidden');
+        document.getElementById('inhalt').style.display = 'block';
+      }
+
+      this.isShown = false;
+    }
+  }, {
     key: '_gc',
     value: function _gc() {
       if (this._cache.length > this._MAX_LOG_ENTRIES) {
@@ -2954,6 +3096,8 @@ var GMLogger = function () {
   }, {
     key: '_log',
     value: function _log(level) {
+      var _this9 = this;
+
       var time = new Date();
 
       for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -2962,35 +3106,38 @@ var GMLogger = function () {
 
       var msg = format.apply(undefined, args);
 
-      this._cache.push({
-        time: time,
-        level: level,
-        msg: msg,
-        toString: function toString() {
-          return '[' + time + '][' + level + '] ' + msg;
-        }
-      });
+      this._cache.push(new GMLogEntry(time, level, msg));
 
-      if (level === 'error') {
-        var ep = error('Error occurs. <br>(Click to view logs)', {
-          listeners: {
-            click: function click(e) {
-              ep.hide();
-            }
-          }
+      this._save();
+
+      if (level === 'error' && !hasDialogShown('error')) {
+        error('Error occurs.', {
+          click: function click() {
+            _this9.showPanel();
+          },
+          footer: '(Click to view details)'
         });
       }
     }
   }, {
     key: '_load',
     value: function _load() {
-      this._cache = GM_getValue(this._GM_key, []);
+      this.level = GM_getValue(this._state_key, {}).level || 'error';
+      this._cache = GM_getValue(this._GM_key, []).map(function (rawEntry) {
+        return rawEntry.match(/^\[(.*?)\]\[(.*?)\] (.*)$/);
+      }).filter(function (matchedEntry) {
+        return matchedEntry !== null;
+      }).map(function (matchedEntry) {
+        return new GMLogEntry(new Date(matchedEntry[1]), matchedEntry[2], matchedEntry[3]);
+      });
     }
   }, {
     key: '_save',
     value: function _save() {
       this._gc();
-      GM_setValue(this._GM_key, this._cache);
+      GM_setValue(this._GM_key, this._cache.map(function (entry) {
+        return entry.toString();
+      }));
     }
   }, {
     key: 'debug',
@@ -3047,6 +3194,14 @@ var GMLogger = function () {
 
   return GMLogger;
 }();
+
+GMLogger.levelMap = {
+  'debug': 0,
+  'info': 10,
+  'warn': 20,
+  'error': 30,
+  'off': 40
+};
 
 function getLogger() {
   try {
@@ -3263,18 +3418,23 @@ function handleNonAuction() {
         LOG.error(err);
         return;
       }
+
+      LOG.info('Dependency check passed');
       cb();
     };
     var deps = void 0;
 
     if (document.location.href.indexOf('/game/index.php?page=traderOverview') >= 0) {
+      LOG.debug('This is traderOverview page');
       deps = DEP_LIST.AUCTION;
       handle = handle.bind(null, handleAuction);
     } else if (document.getElementById('bar')) {
+      LOG.debug('This is not traderOverview page');
       deps = DEP_LIST.NON_AUCTION;
       handle = handle.bind(null, handleNonAuction);
     }
 
+    LOG.info('Start dependency check');
     checkDependencies(unsafeWindow, deps, handle);
   } catch (e) {
     LOG.error('Error is caught in the entry.');
