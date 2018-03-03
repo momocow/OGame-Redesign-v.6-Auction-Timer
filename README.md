@@ -14,7 +14,12 @@
 ## Installation Guide
 There are different ways to install userscripts. Here is the [official installation guide](http://tampermonkey.net/faq.php#Q102) from Tampermonkey.
 
-### Recommended ways
+### Update existing script
+Take a look [here](http://tampermonkey.net/faq.php#Q101) in the official Q&A of TamperMonkey. You can always force an update check through the update button in the context menu.
+
+For users under v3.0.0 where the update pipeline is not clear. Please do a clean install first, i.e. remove the old one and then follow the following steps.
+
+### Clean install (Recommended)
 1. [**[Click me]**](https://raw.githubusercontent.com/momocow/OGame-Redesign-v.6-Auction-Timer/master/dist/auction-timer.user.js) and the Tampermonkey will show up asking if you want to install the script.
 2. If Tampermonkey does not show up
     - open Tampermonkey's dashboard
