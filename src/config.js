@@ -5,14 +5,12 @@ export const DEP_LIST = {
   AUCTION: [
     'io',
     '$',
-    'localStorage',
     'nodeParams',
     'simpleCountdown',
     'loca'
   ],
   NON_AUCTION: [
     '$',
-    'localStorage',
     'simpleCountdown'
   ]
 }

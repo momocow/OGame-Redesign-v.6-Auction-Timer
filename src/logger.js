@@ -5,6 +5,8 @@ import { MAX_LOG_ENTRIES } from './config'
 import { NotSupportedError } from './errors'
 import { error as promptError, hasDialogShown } from './ui/dialog'
 
+const EMPTY_LOGS = 'No logs available for the current filter.'
+
 /* eslint-disable */
 GM_getValue = GM_getValue || function (key, defaultVal) {
   if (!window.localStorage && !window.localStorage.getItem) throw new NotSupportedError()
@@ -211,7 +213,7 @@ class GMLogger {
         copyzone.classList.add('auc-timer-copyzone')
         copyzone.value = this._cache.filter((entry) => {
           return GMLogger.levelMap[entry.level] >= GMLogger.levelMap[this.level]
-        }).join('\n').trim() || 'No logs for the current level'
+        }).join('\n').trim() || EMPTY_LOGS
         copyzone.select()
         document.execCommand('copy')
       })
@@ -236,7 +238,7 @@ class GMLogger {
       return entry.toHTML()
     }).join('<hr class="auc-timer-logger-sep">')
 
-    logsDisplay.innerHTML = logs.trim() ? logs : '<div style="color:grey;pointer-events: none;">No logs for the current level</div>'
+    logsDisplay.innerHTML = logs.trim() ? logs : '<div style="color:grey;pointer-events: none;">' + EMPTY_LOGS + '</div>'
   }
 
   closePanel () {

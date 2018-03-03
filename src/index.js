@@ -3,6 +3,7 @@ import { checkDependencies } from './dependency'
 import { handleAuction } from './handler/auction'
 import { handleNonAuction } from './handler/non-auction'
 import { LOG } from './logger'
+import './ui/stateful'
 
 (function () {
   // The following "if" is not really necessary but with it this script will work for Opera too

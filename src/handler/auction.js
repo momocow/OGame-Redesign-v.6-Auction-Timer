@@ -1,4 +1,5 @@
-/* globals $, localStorage, io */
+/* globals $, io */
+/* globals GM_getValue, GM_setValue */
 /* globals nodeParams, simpleCountdown, loca */
 
 import { SafeFunction } from '../../util/function'
@@ -29,13 +30,14 @@ export function handleAuction () {
     if ($('#auctionTimer').length > 0) { return }
     $('p.auction_info').next().before('<span id="auctionTimer" style="font-weight: bold; color: ' + $('p.auction_info span').css('color') + ';"></span>')
     if ($('#div_traderAuctioneer .left_header h2').text().indexOf(loca.auctionFinished) < 0) {
-      auctionEndTime = localStorage.getItem(uni + '_auctionEndTime')
-      auctionEndTime = (auctionEndTime) ? parseInt(auctionEndTime) : -1
+      auctionEndTime = GM_getValue(uni + '_auctionEndTime', -1)
       currentTime = new Date().getTime()
       if (auctionEndTime >= currentTime) {
         secs = Math.round((auctionEndTime - currentTime) / 1000)
         oldMins = Math.ceil(secs / 60)
         first = false
+        LOG.info('Ending time is found in storage. Action will end at ' + (new Date(auctionEndTime).toLocaleString()))
+        document.getElementById('auctionTimer').classList.add('service')
       } else {
         let matched = $('p.auction_info').text().match(/\d+/g)
         if (!matched) return
@@ -53,20 +55,32 @@ export function handleAuction () {
       mySock.on('timeLeft', function (msg) {
         if ($('#div_traderAuctioneer .left_header h2').text().indexOf(loca.auctionFinished) >= 0) {
           first = true
-          localStorage.setItem(uni + '_auctionEndTime', '-1')
+          GM_setValue(uni + '_auctionEndTime', '-1')
+          LOG.info('Auction ends')
+          document.getElementById('auctionTimer').classList.remove('service')
           return
         }
-        auctionEndTime = localStorage.getItem(uni + '_auctionEndTime')
-        auctionEndTime = (auctionEndTime) ? parseInt(auctionEndTime) : -1
-        currentTime = new Date().getTime();
-        /<b>\D+(\d+)/.exec(msg)
-        newMins = parseInt(RegExp.$1)
+        auctionEndTime = GM_getValue(uni + '_auctionEndTime', -1)
+        currentTime = new Date().getTime()
+        newMins = parseInt(/<b>\D+(\d+)/.exec(msg)[1])
         if (newMins === oldMins) {
           mins--
-          if (first) { first = false } else if (auctionEndTime >= 0) { localStorage.setItem(uni + '_auctionEndTime', currentTime + mins * 60 * 1000) }
+          if (first) {
+            first = false
+          } else if (auctionEndTime >= 0) {
+            GM_setValue(uni + '_auctionEndTime', currentTime + mins * 60 * 1000)
+            LOG.info('Auction ending time is locked')
+            document.getElementById('auctionTimer').classList.add('service')
+          }
         } else {
           if ((newMins > oldMins) && (auctionEndTime >= currentTime)) { newMins = Math.round((auctionEndTime - currentTime) / (1000 * 60)) }
-          if (first) { first = false } else if (oldMins >= 0) { localStorage.setItem(uni + '_auctionEndTime', currentTime + newMins * 60 * 1000) }
+          if (first) {
+            first = false
+          } else if (oldMins >= 0) {
+            GM_setValue(uni + '_auctionEndTime', currentTime + newMins * 60 * 1000)
+            LOG.info('Auction ending time is locked')
+            document.getElementById('auctionTimer').classList.add('service')
+          }
           oldMins = newMins
           mins = newMins
         }
@@ -81,6 +95,7 @@ export function handleAuction () {
         auctionTimer = new SimpleCountdown($('#auctionTimer').get(0), mins * 60, function () { $('#auctionTimer').text('') })
         overflowAuctionTimer = null
         first = true
+        LOG.info('Auction starts')
         setTimeout(function () {
           $('#auctionTimer').css('color', $('p.auction_info span').css('color'))
         }, 100)
@@ -89,16 +104,22 @@ export function handleAuction () {
         changeTimeLeft(auctionTimer, 0)
         changeTimeLeft(overflowAuctionTimer, 0)
         first = true
-        localStorage.setItem(uni + '_auctionEndTime', '-1')
+        GM_setValue(uni + '_auctionEndTime', '-1')
+        LOG.info('Auction ends')
+        document.getElementById('auctionTimer').classList.remove('service')
       })
     })
 
     onConnect.on('error', err => {
+      LOG.error('Error occurs in #onConnect()')
       LOG.error(err)
     })
 
     mySock.on('connect', onConnect)
-      .on('error', LOG.error.bind(LOG))
+      .on('error', (err) => {
+        LOG.error('Socket error.')
+        LOG.error(err)
+      })
   }
 
   if (document.getElementById('div_traderAuctioneer')) {
