@@ -3054,7 +3054,7 @@ var GMLogger = function () {
           document.execCommand('copy');
         });
       } else {
-        logsDisplay = this.content.firstChild;
+        logsDisplay = this.content.childNodes[1];
       }
 
       this.loadLogs(logsDisplay);
@@ -3062,7 +3062,9 @@ var GMLogger = function () {
       logsDisplay.scrollTop = logsDisplay.scrollHeight;
 
       this.content.classList.remove('hidden');
-      document.getElementById('inhalt').style.display = 'none';
+
+      var originalContent = document.getElementById('inhalt') || document.getElementById('content');
+      originalContent.style.display = 'none';
       this.isShown = true;
     }
   }, {
@@ -3083,7 +3085,8 @@ var GMLogger = function () {
     value: function closePanel() {
       if (this.content && !this.content.classList.contains('hidden')) {
         this.content.classList.add('hidden');
-        document.getElementById('inhalt').style.display = 'block';
+        var originalContent = document.getElementById('inhalt') || document.getElementById('content');
+        originalContent.style.display = 'block';
       }
 
       this.isShown = false;

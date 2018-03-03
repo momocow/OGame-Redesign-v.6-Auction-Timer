@@ -218,7 +218,7 @@ class GMLogger {
         document.execCommand('copy')
       })
     } else {
-      logsDisplay = this.content.firstChild
+      logsDisplay = this.content.childNodes[1]
     }
 
     // load logs
@@ -227,7 +227,9 @@ class GMLogger {
     logsDisplay.scrollTop = logsDisplay.scrollHeight
 
     this.content.classList.remove('hidden')
-    document.getElementById('inhalt').style.display = 'none'
+
+    let originalContent = document.getElementById('inhalt') || document.getElementById('content')
+    originalContent.style.display = 'none'
     this.isShown = true
   }
 
@@ -244,7 +246,8 @@ class GMLogger {
   closePanel () {
     if (this.content && !this.content.classList.contains('hidden')) {
       this.content.classList.add('hidden')
-      document.getElementById('inhalt').style.display = 'block'
+      let originalContent = document.getElementById('inhalt') || document.getElementById('content')
+      originalContent.style.display = 'block'
     }
 
     this.isShown = false
