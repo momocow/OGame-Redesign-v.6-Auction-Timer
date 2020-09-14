@@ -165,7 +165,7 @@ class GMLogger {
     let logsDisplay
 
     if (!this.content) {
-      this.content = document.getElementById('contentWrapper').appendChild(document.createElement('div'))
+      this.content = document.getElementById('middle').appendChild(document.createElement('div'))
       this.content.classList.add('auc-timer-logger')
 
       const logFilterLabel = this.content.appendChild(document.createElement('label'))
@@ -228,8 +228,7 @@ class GMLogger {
 
     this.content.classList.remove('hidden')
 
-    let originalContent = document.getElementById('inhalt') || document.getElementById('content')
-    originalContent.style.display = 'none'
+    $(this.content).prevUntil().hide()
     this.isShown = true
   }
 
@@ -246,8 +245,7 @@ class GMLogger {
   closePanel () {
     if (this.content && !this.content.classList.contains('hidden')) {
       this.content.classList.add('hidden')
-      let originalContent = document.getElementById('inhalt') || document.getElementById('content')
-      originalContent.style.display = 'block'
+      $(this.content).prevUntil().show()
     }
 
     this.isShown = false

@@ -22,7 +22,7 @@ import './ui/stateful'
     }
     let deps
 
-    if (document.location.href.indexOf('/game/index.php?page=traderOverview') >= 0) {
+    if (location.pathname === "/game/index.php" && location.search.includes("component=traderOverview")) {
       LOG.debug('This is traderOverview page')
       deps = DEP_LIST.AUCTION
       handle = handle.bind(null, handleAuction)
