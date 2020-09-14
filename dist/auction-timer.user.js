@@ -2,7 +2,7 @@
 // @name           OGame Redesign (v.6): Auction Timer
 // @author         MomoCow
 // @namespace      https://github.com/momocow
-// @version        3.0.1
+// @version        3.0.2
 // @description    Displays a countdown timer for the Auction in OGame 6.*
 // @include        *.ogame*gameforge.com/game/index.php?page=*
 // @updateURL      https://raw.githubusercontent.com/momocow/OGame-Redesign-v.6-Auction-Timer/master/dist/auction-timer.meta.js
@@ -52,6 +52,8 @@ var DEP_LIST = {
 
 var hasOwn = Object.prototype.hasOwnProperty;
 var toStr = Object.prototype.toString;
+var defineProperty = Object.defineProperty;
+var gOPD = Object.getOwnPropertyDescriptor;
 
 var isArray = function isArray(arr) {
   if (typeof Array.isArray === 'function') {
@@ -79,6 +81,31 @@ var isPlainObject = function isPlainObject(obj) {
   return typeof key === 'undefined' || hasOwn.call(obj, key);
 };
 
+var setProperty = function setProperty(target, options) {
+  if (defineProperty && options.name === '__proto__') {
+    defineProperty(target, options.name, {
+      enumerable: true,
+      configurable: true,
+      value: options.newValue,
+      writable: true
+    });
+  } else {
+    target[options.name] = options.newValue;
+  }
+};
+
+var getProperty = function getProperty(obj, name) {
+  if (name === '__proto__') {
+    if (!hasOwn.call(obj, name)) {
+      return void 0;
+    } else if (gOPD) {
+      return gOPD(obj, name).value;
+    }
+  }
+
+  return obj[name];
+};
+
 var extend = function extend() {
   var options, name, src, copy, copyIsArray, clone;
   var target = arguments[0];
@@ -101,8 +128,8 @@ var extend = function extend() {
 
     if (options != null) {
       for (name in options) {
-        src = target[name];
-        copy = options[name];
+        src = getProperty(target, name);
+        copy = getProperty(options, name);
 
         if (target !== copy) {
           if (deep && copy && (isPlainObject(copy) || (copyIsArray = isArray(copy)))) {
@@ -113,9 +140,9 @@ var extend = function extend() {
               clone = src && isPlainObject(src) ? src : {};
             }
 
-            target[name] = extend(deep, clone, copy);
+            setProperty(target, { name: name, newValue: extend(deep, clone, copy) });
           } else if (typeof copy !== 'undefined') {
-            target[name] = copy;
+            setProperty(target, { name: name, newValue: copy });
           }
         }
       }
@@ -3007,7 +3034,7 @@ var GMLogger = function () {
       var logsDisplay = void 0;
 
       if (!this.content) {
-        this.content = document.getElementById('contentWrapper').appendChild(document.createElement('div'));
+        this.content = document.getElementById('middle').appendChild(document.createElement('div'));
         this.content.classList.add('auc-timer-logger');
 
         var logFilterLabel = this.content.appendChild(document.createElement('label'));
@@ -3063,8 +3090,7 @@ var GMLogger = function () {
 
       this.content.classList.remove('hidden');
 
-      var originalContent = document.getElementById('inhalt') || document.getElementById('content');
-      originalContent.style.display = 'none';
+      $(this.content).prevUntil().hide();
       this.isShown = true;
     }
   }, {
@@ -3085,8 +3111,7 @@ var GMLogger = function () {
     value: function closePanel() {
       if (this.content && !this.content.classList.contains('hidden')) {
         this.content.classList.add('hidden');
-        var originalContent = document.getElementById('inhalt') || document.getElementById('content');
-        originalContent.style.display = 'block';
+        $(this.content).prevUntil().show();
       }
 
       this.isShown = false;
@@ -3438,7 +3463,7 @@ GM_addStyle('\n  #auctionTimer {\n    display: inline-block;\n    width: 100%;\n
     };
     var deps = void 0;
 
-    if (document.location.href.indexOf('/game/index.php?page=traderOverview') >= 0) {
+    if (location.pathname === "/game/index.php" && location.search.includes("component=traderOverview")) {
       LOG.debug('This is traderOverview page');
       deps = DEP_LIST.AUCTION;
       handle = handle.bind(null, handleAuction);
