@@ -1,6 +1,10 @@
-# OGame Redesign (v.6): Auction Timer
+> This project is in maintenance mode, which means bug fixes only, no new feature will be added.
+
+# OGame Redesign (v7): Auction Timer
 
 ## Changelog
+- v3.0.2
+    - [FIXED] Migrate to OGame v7. [(#10)](https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer/issues/10)
 - v3.0.0
     - [ADDED] Dependency check [(#3)](https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer/issues/3)
     - [ADDED] Stateful timer [(#4)](https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer/issues/4)
@@ -25,19 +29,6 @@ For users under v3.0.0 where the update pipeline is not clear. Please do a clean
     - open Tampermonkey's dashboard
     - go to the **utils** tab
     - paste [the following link](#the-distributable-is-here) to import from the **URL**.
-
-### The distributable is here
-```
-https://raw.githubusercontent.com/momocow/OGame-Redesign-v.6-Auction-Timer/master/dist/auction-timer.user.js
-```
-
-### Manually install
-If you prefer to install it through copy and paste from the source. You can find it at `dist/auction-timer.user.js` in each branch named after its version.
-- [Master (the stable verison)](https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer/tree/master)
-- Nightly build (**WIP** version, possibly failed)
-    - [v3.0](https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer/tree/v3.0)
-- Histroy  
-*(none)*
 
 ## For Developers
 
