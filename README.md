@@ -3,6 +3,8 @@
 # OGame Redesign (v7): Auction Timer
 
 ## Changelog
+- v3.0.3
+    - [FIXED] Socket.io connection port changed.
 - v3.0.2
     - [FIXED] Migrate to OGame v7. [(#10)](https://github.com/momocow/OGame-Redesign-v.6-Auction-Timer/issues/10)
 - v3.0.0
