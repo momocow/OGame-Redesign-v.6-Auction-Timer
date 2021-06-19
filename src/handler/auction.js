@@ -116,8 +116,8 @@ export function handleAuction () {
     })
 
     mySock.on('connect', onConnect)
-      .on('error', (err) => {
-        LOG.error('Socket error.')
+      .on('connect_error', (err) => {
+        LOG.error('Connect error.')
         LOG.error(err)
       })
   }
