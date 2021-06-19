@@ -2,7 +2,7 @@
 // @name           OGame Redesign (v.6): Auction Timer
 // @author         MomoCow
 // @namespace      https://github.com/momocow
-// @version        3.0.2
+// @version        3.0.3
 // @description    Displays a countdown timer for the Auction in OGame 6.*
 // @include        *.ogame*gameforge.com/game/index.php?page=*
 // @updateURL      https://raw.githubusercontent.com/momocow/OGame-Redesign-v.6-Auction-Timer/master/dist/auction-timer.meta.js
@@ -3330,7 +3330,7 @@ function handleAuction() {
       });
     }
 
-    var mySock = io.connect('/auctioneer', nodeParams);
+    var mySock = io.connect(':' + nodePort + '/auctioneer', nodeParams);
     var onConnect = new SafeFunction(function () {
       mySock.on('timeLeft', function (msg) {
         if ($('#div_traderAuctioneer .left_header h2').text().indexOf(loca.auctionFinished) >= 0) {
@@ -3405,8 +3405,8 @@ function handleAuction() {
       LOG.error(err);
     });
 
-    mySock.on('connect', onConnect).on('error', function (err) {
-      LOG.error('Socket error.');
+    mySock.on('connect', onConnect).on('connect_error', function (err) {
+      LOG.error('Connect error.');
       LOG.error(err);
     });
   };
