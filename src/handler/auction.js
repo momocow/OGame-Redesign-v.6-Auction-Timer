@@ -1,6 +1,6 @@
 /* globals $, io */
 /* globals GM_getValue, GM_setValue */
-/* globals nodeParams, simpleCountdown, loca */
+/* globals nodePort, nodeParams, simpleCountdown, loca */
 
 import { SafeFunction } from '../../util/function'
 import { LOG } from '../logger'
@@ -50,7 +50,7 @@ export function handleAuction () {
       auctionTimer = new SimpleCountdown($('#auctionTimer').get(0), secs, function () { $('#auctionTimer').text('') })
     }
 
-    let mySock = io.connect('/auctioneer', nodeParams)
+    let mySock = io.connect(':' + nodePort + '/auctioneer', nodeParams)
     let onConnect = new SafeFunction(function () {
       mySock.on('timeLeft', function (msg) {
         if ($('#div_traderAuctioneer .left_header h2').text().indexOf(loca.auctionFinished) >= 0) {
