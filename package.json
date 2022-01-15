@@ -39,7 +39,7 @@
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.1.0",
     "rollup-plugin-node-resolve": "^3.0.3",
-    "shelljs": "^0.8.1"
+    "shelljs": "^0.8.5"
   },
   "dependencies": {
     "extend": "^3.0.2"
